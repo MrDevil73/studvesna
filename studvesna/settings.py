@@ -32,10 +32,9 @@ SECRET_KEY = 'django-insecure-ac7pqr-7(#(o34ar+=)af)5kvzag9mjsh72w^$62!&oz5e#72b
 DEBUG = True
 
 ALLOWED_HOSTS = ['blessed-happily-pheasant.ngrok-free.app','ngrok-free.app','*']
-CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app', 'https://*.127.0.0.1']
+#CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app', 'https://*.127.0.0.1','studvesna.mrdevil.ru']
 
 APPEND_SLASH = True
-CSRF_COOKIE_SECURE = False
 # Application definition
 
 INSTALLED_APPS = [
@@ -122,6 +121,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
