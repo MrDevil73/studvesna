@@ -63,15 +63,17 @@ class ForPerformance(admin.ModelAdmin):
         return f"{sum(cnt)}"
     def category_name(self, obj):
         return obj.category.name_category
-
+    def olymp(self,obj):
+        return "Олимпийский" if obj.is_olympic else ""
     category_name.short_description = 'Категория'  # Название столбца в админке
     category_name.admin_order_field = 'category__name_category'
 
     ordering = ['category__name_category', 'title_name']
-    list_display = ['title_name', 'executor', 'category_name', 'send_status', 'counter_scores','sum_scores']
+    list_display = ['title_name', 'executor', 'category_name', 'send_status','olymp', 'counter_scores','sum_scores']
     counter_scores.short_description = 'Количество оценок'
     send_status.short_description = 'Статус отправки'
     sum_scores.short_description = 'Суммарно баллов'
+    olymp.short_description = 'В Олиимпийской'
 
 
 
@@ -91,9 +93,10 @@ class ForPerformance(admin.ModelAdmin):
             return
         judges = TgUser.objects.filter(is_judge=True)
 
-        mes, keyb_score = Create_Score_Message(queryset[0])
+
 
         for tgus in judges:
+            mes, keyb_score = Create_Score_Message(queryset[0],tgus)
             send_message(tgus.user_id, mes, keyb_score)
         queryset[0].is_sended = True
         queryset[0].save()
@@ -123,7 +126,7 @@ class ForPerformance(admin.ModelAdmin):
                 self.message_user(request, "Нужно выбрать только одно выступление", level=djangoMessage.WARNING)
                 return
             # print(judge)
-            mes, keyb_score = Create_Score_Message(queryset[0])
+            mes, keyb_score = Create_Score_Message(queryset[0],judge)
 
             send_message(judge.user_id, mes, keyb_score)
 

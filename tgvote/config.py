@@ -17,10 +17,16 @@ class MyExceptionHandler(telebot.ExceptionHandler):
 bot = telebot.TeleBot(os.getenv("STUDVESNA_TG"), exception_handler=MyExceptionHandler())
 
 
-def send_message(chat, message, reply_markup=None, parse=None):
+def send_message(chat, message, reply_markup=None, parse=None,rep_id=0):
     """Send message to telegram"""
     try:
-        bot.send_message(chat_id=chat, text=message, reply_markup=reply_markup, parse_mode=parse if parse else None, disable_web_page_preview=True)
+        bot.send_message(chat_id=chat,
+                         text=message,
+                         reply_markup=reply_markup,
+                         parse_mode=parse if parse else None,
+                         disable_web_page_preview=True,
+                         reply_parameters=telebot.types.ReplyParameters(message_id=rep_id)
+                         )
     except Exception as ex:
         pass
 

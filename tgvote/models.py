@@ -13,7 +13,7 @@ class TgUser(models.Model):
         #nm += f"@{self.username} " if self.username else ""
         nm += f"{self.name} " if self.name else ""
         nm += f"id_{self.user_id} " if nm == "" else ""
-        nm += f"(СУДЬЯ)" if self.is_judge else ""
+        nm += f" (СУДЬЯ)" if self.is_judge else ""
         return nm
 
     def create_or_update_user(self, tg_json: TelegramUser) -> 'TgUser':
@@ -21,7 +21,7 @@ class TgUser(models.Model):
         if created or user.username != tg_json.username:
             user.username = tg_json.username or user.username
             nm = tg_json.first_name if tg_json.first_name else ""
-            nm += tg_json.last_name if tg_json.last_name else ""
+            nm += " "+tg_json.last_name if tg_json.last_name else ""
             user.name = nm
             user.save()
 
@@ -40,6 +40,7 @@ class Performance(models.Model):
     title_name = models.CharField(max_length=128)
     executor = models.CharField(max_length=128)
     is_sended = models.BooleanField(default=False)
+    is_olympic = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.title_name} {self.executor}"

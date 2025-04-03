@@ -19,9 +19,9 @@ SECRET_TOKEN = os.getenv("SECRET_TOKEN")
 def TgParse(request):
     data = ""
     try:
-        token_telegram = request.headers.get("X-Telegram-Bot-Api-Secret-Token", None)
-        if token_telegram != SECRET_TOKEN:
-            return HttpResponse("F u", status=418)
+        # token_telegram = request.headers.get("X-Telegram-Bot-Api-Secret-Token", None)
+        # if token_telegram != SECRET_TOKEN:
+        #     return HttpResponse("F u", status=418)
         data = request.body.decode('UTF-8', 'ignore')
         update = types.Update.de_json(data)
         TgBot.process_new_updates([update])

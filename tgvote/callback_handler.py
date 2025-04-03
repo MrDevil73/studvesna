@@ -4,12 +4,22 @@ from .config import send_message, edit_message
 import tgvote.keyboards as MyKeyb
 
 
-def Create_Score_Message(perfom: Performance):
-    keyb_score = MyKeyb.score_keyboard(perfom.id)
+def Create_Score_Message(perfom: Performance, user: TgUser):
     mes = (f"Категория: {perfom.category.name_category}\n"
            f"Название выступления: {perfom.title_name}\n"
            f"Исполнитель: {perfom.executor}\n\n"
            f"Как вы его оцените?")
+    if perfom.is_olympic:
+        all_perf_by_category = Performance.objects.filter(category_id=perfom.category_id).all()
+        perf_ids=[el.id for el in all_perf_by_category]
+        all_scores=Score.objects.filter(performance_id__in=perf_ids,judge=user).all()
+        excl=[ind for ind in range(1,11-len(perf_ids))]
+        for score in all_scores:
+            excl.append(score.value)
+        keyb_score = MyKeyb.score_keyboard(perfom.id,excl)
+    else:
+        keyb_score = MyKeyb.score_keyboard(perfom.id)
+
     return mes,keyb_score
 
 
@@ -41,7 +51,7 @@ def give_choice_score(call: CallbackQuery):
     if not perfom:
         send_message(call.message.chat.id, "Ошибка выступления, обратитесь к администратору")
         return None
-    mes,keyb_score=Create_Score_Message(perfom)
+    mes,keyb_score=Create_Score_Message(perfom,user)
     edit_message(call.message.chat.id, call.message.message_id, mes, reply_markup=keyb_score)
 
 
@@ -49,14 +59,26 @@ def set_assesment(call: CallbackQuery):
     user = TgUser().create_or_update_user(call.from_user)
 
     id_perf, score_value = map(int, call.data.split('_')[1:])
-
+    perfom: Performance = Performance.objects.filter(id=id_perf).prefetch_related('category').first()
+    if not perfom:
+        send_message(call.message.chat.id, "Ошибка выступления, обратитесь к администратору")
+        return
+    if perfom.is_olympic:
+        perf_ids_els=Performance.objects.filter(category_id=perfom.category_id).all()
+        perf_ids=[el.id for el in perf_ids_els]
+        score_with_this_value=Score.objects.filter(value=score_value, judge=user, performance_id__in=perf_ids).first()
+        if score_with_this_value is None:
+            pass
+        else:
+            perfo=Performance.objects.filter(id=score_with_this_value.performance_id).first()
+            messge=f"У вас уже установлена оценка {score_value} для {perfo.title_name}\nВыберите другую оценку или смените для {perfo.title_name}"
+            keyb=MyKeyb.change_score_perfomance(perfo.id,f"Сменить оценку для {perfo.title_name}")
+            send_message(call.message.chat.id, messge,rep_id=call.message.id,reply_markup=keyb)
+            return
     score_mdl, crt = Score.objects.get_or_create(judge_id=user.user_id, performance_id=id_perf)
     score_mdl.value = score_value
     score_mdl.save()
 
-    perfom: Performance = Performance.objects.filter(id=id_perf).prefetch_related('category').first()
-    if not perfom:
-        send_message(call.message.chat.id, "Ошибка выступления, обратитесь к администратору")
 
     mes = (f"Категория: {perfom.category.name_category}\n"
            f"Название выступления: {perfom.title_name}\n"
